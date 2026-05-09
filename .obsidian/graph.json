@@ -1,22 +1,58 @@
 {
-  "collapse-filter": true,
+  "collapse-filter": false,
   "search": "",
   "showTags": false,
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
-  "collapse-color-groups": true,
-  "colorGroups": [],
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "tag:#data-science",
+      "color": {
+        "a": 1,
+        "rgb": 16713958
+      }
+    },
+    {
+      "query": "tag:#productivity",
+      "color": {
+        "a": 1,
+        "rgb": 5885175
+      }
+    },
+    {
+      "query": "tag:#mlops",
+      "color": {
+        "a": 1,
+        "rgb": 10139915
+      }
+    },
+    {
+      "query": "tag:#creative",
+      "color": {
+        "a": 1,
+        "rgb": 14027036
+      }
+    },
+    {
+      "query": "tag:#software-development",
+      "color": {
+        "a": 1,
+        "rgb": 8421504
+      }
+    }
+  ],
   "collapse-display": false,
-  "showArrow": false,
-  "textFadeMultiplier": 0,
-  "nodeSizeMultiplier": 1,
-  "lineSizeMultiplier": 1,
-  "collapse-forces": true,
-  "centerStrength": 0.518713248970312,
-  "repelStrength": 10,
-  "linkStrength": 1,
-  "linkDistance": 250,
-  "scale": 0.4246064988412783,
+  "showArrow": true,
+  "textFadeMultiplier": -1,
+  "nodeSizeMultiplier": 1.5,
+  "lineSizeMultiplier": 1.2,
+  "collapse-forces": false,
+  "centerStrength": 0.4,
+  "repelStrength": 12,
+  "linkStrength": 0.8,
+  "linkDistance": 200,
+  "scale": 0.3297685352025657,
   "close": true
 }
