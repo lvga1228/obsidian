@@ -8,7 +8,7 @@ display_name: "OpenAI Codex"
 
 **Skill ID:** `codex`  
 **Category:** [[autonomous-ai-agents]]  
-**Description:** 委托编码给OpenAI Codex CLI
+**Description:** Delegate coding to OpenAI Codex CLI (features, PRs).
 
 ## AI Coding Agents
 
