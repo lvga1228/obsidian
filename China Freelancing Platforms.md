@@ -1,0 +1,138 @@
+---
+tags: [skill, hermes]
+category: 📋 Productivity
+skill_id: china-freelancing-platforms
+---
+
+# China Freelancing Platforms
+
+**分类:** 📋 Productivity
+**Skill ID:** `china-freelancing-platforms`
+
+> Research and evaluate freelancing platforms for data analysis services from China — accessibility testing, platform comparison, strategic recommendations
+
+---
+
+
+# China Data Analysis Freelancing Platforms
+
+## Applicable Scenarios
+- Researching where to sell data analysis services online from China
+- Testing platform accessibility (GFW, VPN, Cloudflare blocks)
+- Comparing platform pros/cons for quick gig monetization
+- Expanding beyond a single platform (e.g., moving past Xianyu)
+
+## Core Principles
+1. **Test, don't assume**: Always verify connectivity with curl, not browser assumptions
+2. **Terminal ≠ local machine**: Hermes terminal runs on cloud infra, not user's Mac. Veee proxy config on Hermes may differ from user's local setup.
+3. **Data center IPs get blocked**: Cloudflare and similar CDNs block commercial VPN exit nodes. Residential IPs or direct connections may work where VPN fails.
+4. **Chinese platforms first**: Domestic platforms (no GFW issues, no language barrier, RMB settlement) are the path of least resistance.
+
+## Verified Platform Status (2026-05-08)
+
+### Chinese Platforms (all directly accessible, no VPN required)
+| Platform | URL | Status | Notes |
+|----------|-----|--------|-------|
+| 猪八戒 | zhubajie.com | ✅ 200 | Largest CN freelancing, data analysis category |
+| 一品威客 | epwk.com | ✅ 200 | Second largest, similar model |
+| 程序员客栈 | proginn.com | ✅ 200 | Developer/data pro focused, vetted talent |
+| 实现网 | shixian.com | ✅ 200 | High-end remote, hourly/project billing |
+| 和鲸社区 | heywhale.com | ✅ 200 | Data science community, competitions + gigs |
+| 阿里天池 | tianchi.aliyun.com | ✅ 200 | Competition platform, leads to consulting |
+| 闲鱼 | goofish.com | ✅ 200 | C2C, gig-based, low barrier (already in use) |
+
+### International Platforms
+| Platform | URL | Direct | Via Veee Proxy | Notes |
+|----------|-----|--------|----------------|-------|
+| Kaggle | kaggle.com | ✅ 200 | ✅ 200 | Competitions, not direct gigs |
+| Upwork | upwork.com | ❌ 403 | ❌ 403 | Cloudflare blocks data center IPs |
+| Fiverr | fiverr.com | ❌ 403 | ❌ 403 | Cloudflare blocks data center IPs |
+| Freelancer | freelancer.com | ❌ timeout | ❓ | Timed out, likely blocked |
+
+### Why Veee Fails on Upwork/Fiverr
+Veee exit nodes use data center IPs (e.g., 142.249.38.20). Upwork and Fiverr use Cloudflare Bot Management which flags data center IP ranges. Result: HTTP 403 even through the proxy. Workarounds:
+- Use a residential proxy service (not commercial VPN)
+- Use a non-blocked VPN provider with residential exit nodes
+- Accept that these platforms are impractical and focus on domestic alternatives
+
+## Network Testing Methodology
+
+### Quick Platform Accessibility Test
+```bash
+# Direct (from Hermes cloud)
+curl -sL -o /dev/null -w "%{http_code}" "https://platform.com" --connect-timeout 10
+
+# Through Veee proxy (when proxy is active)
+curl -sL -o /dev/null -w "%{http_code}" \
+  --proxy "http://127.0.0.1:15236" "https://platform.com" --connect-timeout 10
+```
+
+### Bulk Testing Multiple Platforms
+```bash
+for url in "https://site1.com" "https://site2.com"; do
+  echo -n "$url -> "
+  curl -sL -o /dev/null -w "%{http_code}" "$url" --connect-timeout 8 2>/dev/null
+  echo
+done
+```
+
+### Diagnosing HTTP 403
+A 403 from curl does NOT automatically mean the user's browser can't access the site. Check:
+1. Is this running from Hermes cloud terminal? → The IP is the cloud server's, not the user's.
+2. Is the proxy active? → Check `echo $HTTPS_PROXY`
+3. Is Veee using a data center IP? → `curl --proxy ... https://api.ipify.org`
+4. Try with browser User-Agent header to rule out curl detection
+
+## Pitfalls
+
+### proxy_on Bash/Zsh Incompatibility
+`proxy_on` function in `~/.zshrc` uses `${=ports}` (zsh word-splitting syntax). Running from bash terminal fails with "bad substitution". Workaround: manually export the proxy env vars:
+```bash
+export HTTP_PROXY="http://127.0.0.1:15236"
+export HTTPS_PROXY="http://127.0.0.1:15236"
+```
+
+### Veee Port Map
+- Port 15236 = HTTP proxy (working)
+- Port 15235 = not usable (diagnostic only)
+- Only 15236 should be used for proxy connections
+
+### browser_navigate Not Reliable for Research
+Google returns CAPTCHA, DuckDuckGo returns CAPTCHA, Bing returns empty results. For quick fact-finding, prefer curl-based verification of known URLs over browser-based search.
+
+## Platform Selection Strategy for Data Analysis
+
+Priority order for a China-based data analyst:
+1. **闲鱼** (already active) — C2C, low barrier, immediate
+2. **猪八戒 / 一品威客** — Largest traffic, structured gigs
+3. **和鲸社区** — Build portfolio, competition credibility
+4. **程序员客栈 / 实现网** — Higher-value enterprise projects (when portfolio is built)
+5. **Upwork / Fiverr** — International USD revenue. The user CAN access these from their local browser with a working VPN (not Veee). 403 from Hermes cloud terminal does NOT mean the user's local browser is blocked.
+
+## Critical Clarification: Hermes Terminal 403 ≠ User Browser Blocked
+
+When `curl` from Hermes cloud terminal returns HTTP 403 for Upwork/Fiverr, this represents the cloud server's network, NOT the user's local machine. The user may have a working VPN (SS/V2Ray/airport) on their Mac that accesses these sites normally through a browser.
+
+Always distinguish:
+- **Hermes cloud terminal test** → tests Hermes infrastructure network only
+- **Veee proxy test** → tests Veee's data center exit nodes (widely blocked)
+- **User's local browser** → their actual access capability (may work fine)
+
+## Upwork Registration & Quickstart Workflow
+
+When the user wants to start on Upwork from China:
+
+1. **Registration** — Real name + Gmail, "I'm a freelancer" path, no VPN needed (Upwork is accessible from China)
+2. **Profile optimization** — Title, Bio, Skills, Hourly Rate ($20/hr for start), Employment History. See `references/upwork-quickstart.md` for ready-to-copy content.
+3. **Proposal strategy** — Three templates: Quick Diagnostic ($30-50), Full Report ($100-200), Deep Analysis ($300+). Mass-apply (20+ proposals/week), start small to earn reviews.
+4. **Payment: Upwork → Payoneer → Chinese Bank Card (RMB)** — This is THE standard path for Chinese freelancers. Upwork pays to Payoneer (USD virtual US account), Payoneer converts to RMB and deposits to Chinese bank card (1-2 business days, ~1.2% forex spread on top of Upwork's 10-20% service fee). Do NOT use PayPal (CN version can't withdraw) or direct wire transfer ($30 fee per transfer, forex declaration required).
+
+## Data Analysis Freelancing Pipeline Diagnostics
+
+A systematic evaluation framework for optimizing the complete freelancing delivery chain. See `references/freelancing-pipeline-diagnostics.md` for the full 8-stage assessment (获客→接单→沟通需求→数据分析→生成报告→图表→交付→售后).
+
+## Reference Files
+- `references/platform-accessibility-matrix.md` — Full connectivity test results with timestamps
+- `references/upwork-quickstart.md` — Profile copy, proposal templates, action checklist
+- `references/freelancing-pipeline-diagnostics.md` — 8-stage pipeline evaluation framework
+

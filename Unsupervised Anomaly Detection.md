@@ -1,0 +1,156 @@
+---
+tags: [skill, hermes]
+category: 📊 Data Science
+skill_id: unsupervised-anomaly-detection
+---
+
+# Unsupervised Anomaly Detection
+
+**分类:** 📊 Data Science
+**Skill ID:** `unsupervised-anomaly-detection`
+
+> 无监督异常检测框架，使用 Isolation Forest、Local Outlier Factor (LOF)、One-Class SVM 和 DBSCAN 检测孤立点和异常模式。提炼自 Kaggle 1.4K votes 经典 notebook。
+
+---
+
+
+# 无监督异常检测 (Unsupervised Anomaly Detection)
+
+## Purpose
+在没有标签的情况下检测异常数据点。适用于：欺诈预筛、设备故障预警、数据质量验证。与 `imbalanced-classification` (有监督)互补——本技能用于无标签场景。
+
+## When to use
+- 无标签数据中找"不正常"的记录
+- 欺诈/故障的初步筛查（先找异常，再人工核实）
+- 数据清洗中的极端异常值发现
+- 用户说"找异常点"、"哪些数据不对劲"
+
+## Core Workflow
+
+### Step 1: EDA + 降维可视化
+```python
+import pandas as pd; import numpy as np
+import matplotlib.pyplot as plt; import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# 标准化
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# PCA → 2D 可视化
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+plt.scatter(X_pca[:,0], X_pca[:,1], alpha=0.5, s=5)
+plt.title('PCA Projection — Look for isolated clusters/points')
+plt.show()
+print(f"Explained variance: {pca.explained_variance_ratio_.sum():.1%}")
+```
+
+### Step 2: Isolation Forest (最常用)
+```python
+from sklearn.ensemble import IsolationForest
+
+# contamination: 预期异常比例（估计值，默认0.1）
+iso = IsolationForest(n_estimators=100, contamination=0.05, random_state=42)
+iso.fit(X_scaled)
+
+# -1 = anomaly, 1 = normal
+labels = iso.predict(X_scaled)
+scores = iso.decision_function(X_scaled)  # 分数越低越异常
+
+anomalies = X[labels == -1]
+print(f"Anomalies detected: {len(anomalies)} / {len(X)} ({len(anomalies)/len(X)*100:.1f}%)")
+
+# 可视化
+plt.scatter(X_pca[:,0], X_pca[:,1], c=labels, cmap='coolwarm', alpha=0.5, s=5)
+plt.title('Isolation Forest — Anomaly Detection')
+plt.colorbar(label='-1=Anomaly, 1=Normal')
+plt.show()
+```
+
+### Step 3: Local Outlier Factor (LOF)
+```python
+from sklearn.neighbors import LocalOutlierFactor
+
+lof = LocalOutlierFactor(n_neighbors=20, contamination=0.05)
+lof_labels = lof.fit_predict(X_scaled)
+lof_scores = -lof.negative_outlier_factor_  # 分数越高越异常
+
+# 对比两种方法的一致性
+agreement = (labels == lof_labels).mean()
+print(f"Isolation Forest vs LOF agreement: {agreement:.1%}")
+
+# 两种方法都标记为异常的 → 高置信异常
+both_anomalies = X[(labels == -1) & (lof_labels == -1)]
+print(f"High-confidence anomalies (both methods): {len(both_anomalies)}")
+```
+
+### Step 4: One-Class SVM
+```python
+from sklearn.svm import OneClassSVM
+
+svm = OneClassSVM(kernel='rbf', gamma='auto', nu=0.05)  # nu ≈ contamination
+svm_labels = svm.fit_predict(X_scaled)
+```
+
+### Step 5: DBSCAN (密度异常)
+```python
+from sklearn.cluster import DBSCAN
+
+db = DBSCAN(eps=0.5, min_samples=10)
+db_labels = db.fit_predict(X_scaled)
+
+# label = -1 表示噪声点（不属于任何簇）
+noise = X[db_labels == -1]
+print(f"DBSCAN noise points: {len(noise)} ({len(noise)/len(X)*100:.1f}%)")
+```
+
+### Step 6: 异常画像 (Anomaly Profiling)
+```python
+# 分析异常点与正常点的差异
+anomaly_mask = labels == -1
+
+profile = pd.DataFrame({
+    'Anomaly Mean': X[anomaly_mask].mean(),
+    'Normal Mean':  X[~anomaly_mask].mean(),
+    'Diff': X[anomaly_mask].mean() - X[~anomaly_mask].mean(),
+    'Diff %': (X[anomaly_mask].mean() - X[~anomaly_mask].mean()) / X[~anomaly_mask].mean() * 100
+}).sort_values('Diff %', ascending=False)
+
+print("Top features driving anomalies:")
+print(profile.head(10))
+```
+
+### Step 7: 业务阈值调优
+```python
+# 不一定要用固定的 contamination — 按业务需求定阈值
+scores_sorted = np.sort(scores)
+thresholds = [np.percentile(scores_sorted, p) for p in [1, 2, 5, 10]]
+
+for p, thresh in zip([1,2,5,10], thresholds):
+    n_anomalies = (scores < thresh).sum()
+    print(f"Top {p}% threshold: {n_anomalies} anomalies ({n_anomalies/len(X)*100:.1f}%)")
+```
+
+## Algorithm Selection Guide
+
+| Method | Best For | Weakness |
+|--------|----------|----------|
+| Isolation Forest | General purpose, fast, scales well | Assumes anomalies are few and different |
+| LOF | Local density anomalies | Sensitive to n_neighbors |
+| One-Class SVM | Complex boundaries | Slow on large data |
+| DBSCAN | Cluster-based outliers | eps parameter tuning |
+
+## Common Pitfalls
+1. 不标准化 → 距离/密度方法被量级大的特征主导
+2. contamination 设太高（默认 0.1 = 假设 10% 异常，现实通常 < 1%）
+3. 只用一种方法 → 多方法交叉验证提高置信度
+4. 不分析 WHY → 异常检测的价值在画像分析
+
+## Trigger Phrases
+- "检测异常"、"无监督异常"、"找离群点"
+- "Isolation Forest"、"LOF"、"异常画像"
+- "哪些数据不对劲"、"数据质量控制"
+

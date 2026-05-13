@@ -1,0 +1,59 @@
+---
+tags: [skill, hermes]
+category: 📋 Productivity
+skill_id: invoice-organizer
+---
+
+# Invoice Organizer
+
+**分类:** 📋 Productivity
+**Skill ID:** `invoice-organizer`
+
+> Automatically organize invoices and receipts for tax preparation. Read, categorize, and generate summaries from invoice files. Essential for freelancers. Adapted from ComposioHQ/awesome-codex-skills.
+
+---
+
+
+# Invoice Organizer
+
+自由职业者的发票和收据自动管理。
+
+## When to Use
+
+- 整理项目发票/收据
+- 准备报税材料
+- 统计收入/支出
+- 生成客户账单汇总
+
+## What This Skill Does
+
+1. **读取发票**：OCR 识别 PDF/图片中的发票信息
+2. **自动归类**：按客户、日期、项目类型分类
+3. **生成报表**：月/季度收支汇总
+4. **导出**：Excel/CSV 格式，方便报税
+
+## How to Use
+
+```
+user: "整理我这个月的数据分析项目发票"
+→ Hermes scans ~/Documents/发票/ or specified folder
+→ OCR reads each file
+→ Categorizes by: client, date, amount, project type
+→ Generates summary CSV
+```
+
+## Invoice Data Structure
+
+```csv
+date,client,project,amount,currency,category,file_path
+2026-05-01,某电商公司,库存分析报告,1999,CNY,数据分析,/path/to/invoice.pdf
+```
+
+## Instructions for Agent
+
+1. 扫描指定文件夹中的 PDF/图片
+2. 用 Python (pymupdf/pytesseract) 提取文本
+3. 正则匹配金额、日期、客户名
+4. 生成 CSV 汇总
+5. 缺失信息提示用户补充
+

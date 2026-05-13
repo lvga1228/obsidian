@@ -1,0 +1,66 @@
+---
+tags: [skill, hermes]
+category: 📋 Productivity
+skill_id: file-organizer
+---
+
+# File Organizer
+
+**分类:** 📋 Productivity
+**Skill ID:** `file-organizer`
+
+> Intelligently organize files and folders on macOS — find duplicates, suggest better structures, automated cleanup. Reduces clutter without manual effort. Adapted from ComposioHQ/awesome-codex-skills.
+
+---
+
+
+# File Organizer
+
+自动整理 Mac 上的文件和文件夹。
+
+## When to Use
+
+- Downloads 文件夹太乱
+- 桌面上堆满文件
+- 想清理重复文件
+- 需要按类型/日期归档
+
+## Common Operations
+
+### Scan & Report
+```
+→ Hermes runs: find /path -type f -mtime -30 | sort | head -50
+→ Output: 最近 30 天文件报告 + 建议
+```
+
+### Deduplication
+```
+→ Hermes runs: fdupes or custom Python script
+→ Output: 重复文件列表 + 确认删除
+```
+
+### Organize by Type
+```
+Downloads/
+  ├─ PDF/       ← 所有 .pdf
+  ├─ Images/    ← .jpg .png .gif
+  ├─ Archives/  ← .zip .dmg
+  └─ Code/      ← .py .json .csv
+```
+
+### Organize by Date
+```
+~/Documents/hermes 文件/
+  ├─ 2026-05/
+  ├─ 2026-04/
+  └─ 2026-03/
+```
+
+## Instructions for Agent
+
+1. 先 scan 不要直接改
+2. 展示结果让用户确认
+3. 用 `mv` 或 Python `shutil.move` 整理
+4. 涉及删除前必须用户确认
+5. 优先整理 `~/Downloads` 和 `~/Desktop`
+
